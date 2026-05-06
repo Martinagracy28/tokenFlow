@@ -12,6 +12,8 @@ import {
   useClaimRewards,
   useStakeInfo,
   usePendingRewards,
+  useAllowance,
+  useApprove,
 } from "@/hooks/useStaking";
 import { formatTokenAmount, parseTokenAmount } from "@/lib/ethers";
 import { cn, parseRevertReason } from "@/lib/utils";
@@ -28,9 +30,12 @@ export const StakeForm = () => {
   const { data: stakeInfo } = useStakeInfo();
   const { data: pendingRewards = 0n } = usePendingRewards();
 
+  const { data: allowance = 0n } = useAllowance();
+
   const { mutateAsync: stake } = useStake();
   const { mutateAsync: withdraw } = useWithdraw();
   const { mutateAsync: claim } = useClaimRewards();
+  const { mutateAsync: approve } = useApprove();
 
   const tabs = [
     { id: "stake", label: "Stake", icon: ArrowUpRight },
@@ -45,8 +50,17 @@ export const StakeForm = () => {
     if (parsedAmount > balance) return toast.error("Insufficient balance");
 
     setLoading(true);
-    const tId = toast.loading("Waiting for signature...");
+    const tId = toast.loading("Checking allowance...");
     try {
+      if (allowance < parsedAmount) {
+        toast.loading("Approving tokens...", { id: tId });
+        const approveTx = await approve(parsedAmount);
+        await approveTx.wait();
+        toast.loading("Approval successful! Staking tokens...", { id: tId });
+      } else {
+        toast.loading("Waiting for signature...", { id: tId });
+      }
+
       const tx = await stake({
         amount: parsedAmount,
         duration: Number(duration) * 86400,
@@ -65,10 +79,12 @@ export const StakeForm = () => {
   };
 
   const handleWithdraw = async () => {
+    if (!stakeInfo || stakeInfo.amount === 0n) return;
+    
     setLoading(true);
     const tId = toast.loading("Waiting for signature...");
     try {
-      const tx = await withdraw();
+      const tx = await withdraw(stakeInfo.amount);
       toast.loading("Transaction pending...", { id: tId });
       await tx.wait();
       toast.success("Tokens withdrawn!", { id: tId });
@@ -207,11 +223,16 @@ export const StakeForm = () => {
 
               <Button
                 className="w-full"
-                disabled={!isConnected}
+                disabled={!isConnected || !amount || Number(amount) <= 0}
                 loading={loading}
                 onClick={handleStake}
               >
-                Stake Tokens
+                {!isConnected 
+                  ? "Connect Wallet" 
+                  : allowance < (amount ? parseTokenAmount(amount) : 0n)
+                    ? "Approve & Stake"
+                    : "Stake Tokens"
+                }
               </Button>
             </motion.div>
           )}

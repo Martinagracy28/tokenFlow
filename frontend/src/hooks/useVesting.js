@@ -15,9 +15,14 @@ export const useVestingInfo = () => {
         VESTING_ABI,
         provider,
       );
-      const [total, released, cliff, duration, start] =
-        await contract.getVestingInfo(address);
-      return { total, released, cliff, duration, start };
+      const vesting = await contract.vestings(address);
+      return { 
+        total: vesting.totalAmount, 
+        released: vesting.releasedAmount, 
+        start: vesting.start,
+        cliff: vesting.cliff, 
+        duration: vesting.duration 
+      };
     },
     enabled: !!address && !!provider,
     refetchInterval: 30000,

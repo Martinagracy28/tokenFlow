@@ -283,7 +283,7 @@ export const Landing = () => {
                   variant="secondary" 
                   size="lg" 
                   className="h-12 px-10 text-base"
-                  onClick={() => window.open("https://sepolia.etherscan.io", "_blank")}
+                  onClick={() => window.open(`https://sepolia.etherscan.io/address/0x7ab82B5063E19d3748389DdDA5291412E3B25fF4`, "_blank")}
                 >
                   <ExternalLink className="w-5 h-5" />
                   View Contracts
