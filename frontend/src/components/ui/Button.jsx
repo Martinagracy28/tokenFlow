@@ -26,7 +26,7 @@ export const Button = ({
       whileTap={!disabled && !loading ? { scale: 0.97 } : {}}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
       className={cn(
-        "relative overflow-hidden inline-flex items-center justify-center rounded-button font-medium transition-all duration-200 min-h-[44px] px-6 gap-2",
+        "relative overflow-hidden inline-flex items-center justify-center rounded-button font-medium transition-all duration-200 min-h-[44px] px-6 gap-2 whitespace-nowrap",
         variants[variant],
         (disabled || loading) && "opacity-50 cursor-not-allowed",
         className,
@@ -35,7 +35,9 @@ export const Button = ({
       {...props}
     >
       {loading && <Spinner size="sm" />}
-      <span className={cn(loading && "opacity-0")}>{children}</span>
+      <span className={cn("flex items-center gap-2", loading && "opacity-0")}>
+        {children}
+      </span>
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center">
           <Spinner size="sm" />

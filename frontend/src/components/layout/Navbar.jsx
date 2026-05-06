@@ -22,8 +22,9 @@ export const Navbar = () => {
   const [copied, setCopied] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const { address, isConnected, truncatedAddress, connect, disconnect } =
+  const { address, isConnected, connect, disconnect } =
     useWallet();
+  const truncatedAddress = address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "";
   const location = useLocation();
 
   useEffect(() => {
@@ -44,7 +45,7 @@ export const Navbar = () => {
   }, []);
 
   const navLinks = [
-    { name: "Dashboard", href: "/" },
+    { name: "Dashboard", href: "/dashboard" },
     { name: "Staking", href: "/staking" },
     { name: "Vesting", href: "/vesting" },
   ];
@@ -69,7 +70,7 @@ export const Navbar = () => {
         "fixed top-0 left-0 right-0 z-50 transition-all duration-500 border-b",
         scrolled
           ? "bg-background/70 backdrop-blur-2xl border-white/5 py-3"
-          : "bg-transparent border-transparent py-5",
+          : "bg-transparent border-transparent py-2",
       )}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -262,7 +263,7 @@ export const Navbar = () => {
                         {/* View on Explorer (placeholder) */}
                         <button
                           onClick={() =>
-                            window.open(`https://etherscan.io/address/${address}`, "_blank")
+                            window.open(`https://sepolia.etherscan.io/address/${address}`, "_blank")
                           }
                           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-elevated transition-colors text-sm group"
                         >

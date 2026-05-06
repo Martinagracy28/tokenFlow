@@ -1,8 +1,9 @@
 import { useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Layout } from "./components/layout/Layout";
 import { Dashboard } from "./pages/Dashboard";
+import { Landing } from "./pages/Landing";
 import { Staking } from "./pages/Staking";
 import { Vesting } from "./pages/Vesting";
 import { useWallet } from "./hooks/useWallet";
@@ -17,7 +18,7 @@ const queryClient = new QueryClient({
 });
 
 function App() {
-  const { checkConnection } = useWallet();
+  const { checkConnection, isConnected } = useWallet();
 
   useEffect(() => {
     checkConnection();
@@ -28,9 +29,19 @@ function App() {
       <Router>
         <Layout>
           <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/staking" element={<Staking />} />
-            <Route path="/vesting" element={<Vesting />} />
+            <Route path="/" element={<Landing />} />
+            <Route 
+              path="/dashboard" 
+              element={isConnected ? <Dashboard /> : <Navigate to="/" replace />} 
+            />
+            <Route 
+              path="/staking" 
+              element={isConnected ? <Staking /> : <Navigate to="/" replace />} 
+            />
+            <Route 
+              path="/vesting" 
+              element={isConnected ? <Vesting /> : <Navigate to="/" replace />} 
+            />
           </Routes>
         </Layout>
       </Router>

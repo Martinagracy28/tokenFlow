@@ -16,6 +16,7 @@ import { useStakeInfo, usePendingRewards } from "@/hooks/useStaking";
 import { useVestingInfo } from "@/hooks/useVesting";
 import { formatTokenAmount } from "@/lib/ethers";
 import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 
 export const Dashboard = () => {
@@ -46,30 +47,6 @@ export const Dashboard = () => {
     }, 1000);
     return () => clearInterval(interval);
   }, [stakeInfo?.lockEnd]);
-
-  if (!isConnected) {
-    return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center space-y-8 relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-accent/20 blur-[120px] rounded-full animate-pulse-glow" />
-        <div className="space-y-4 relative">
-          <h1 className="text-5xl font-bold text-text-primary tracking-tight">
-            Connect to <span className="text-accent">TokenFlow</span>
-          </h1>
-          <p className="text-text-secondary text-lg max-w-md mx-auto">
-            Securely stake your tokens, track your vesting schedules, and
-            maximize your DeFi yields.
-          </p>
-        </div>
-        <Button
-          onClick={() => connect()}
-          size="lg"
-          className="h-14 px-10 text-lg shadow-glow relative"
-        >
-          Get Started
-        </Button>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-10">
