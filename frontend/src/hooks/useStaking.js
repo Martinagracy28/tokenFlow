@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Contract } from "ethers";
 import { useWallet } from "./useWallet";
-import { STAKING_ABI, STAKING_CONTRACT_ADDRESS } from "@/lib/contracts";
+import { STAKING_ABI, STAKING_CONTRACT_ADDRESS, TOKEN_CONTRACT_ADDRESS, ERC20_ABI } from "@/lib/contracts";
 
 export const useStakeInfo = () => {
   const { address, provider } = useWallet();
@@ -15,9 +15,13 @@ export const useStakeInfo = () => {
         STAKING_ABI,
         provider,
       );
-      const [amount, lockEnd, rewardDebt] =
-        await contract.getStakeInfo(address);
-      return { amount, lockEnd, rewardDebt };
+      const stake = await contract.stakes(address);
+      return { 
+        amount: stake.amount, 
+        lastUpdated: stake.lastUpdated,
+        rewards: stake.rewards,
+        lockEnd: stake.lockEndTime 
+      };
     },
     enabled: !!address && !!provider,
     refetchInterval: 10000,
@@ -88,14 +92,14 @@ export const useWithdraw = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async (amount) => {
       if (!signer) throw new Error("Wallet not connected");
       const contract = new Contract(
         STAKING_CONTRACT_ADDRESS,
         STAKING_ABI,
         signer,
       );
-      const tx = await contract.withdraw();
+      const tx = await contract.withdraw(amount);
       return tx;
     },
     onSuccess: () => {
@@ -117,12 +121,52 @@ export const useClaimRewards = () => {
         STAKING_ABI,
         signer,
       );
-      const tx = await contract.claimRewards();
+      const tx = await contract.claim();
       return tx;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pendingRewards"] });
       queryClient.invalidateQueries({ queryKey: ["tokenBalance"] });
+    },
+  });
+};
+
+export const useAllowance = () => {
+  const { address, provider } = useWallet();
+
+  return useQuery({
+    queryKey: ["allowance", address, STAKING_CONTRACT_ADDRESS],
+    queryFn: async () => {
+      if (!address || !provider) return 0n;
+      const contract = new Contract(
+        TOKEN_CONTRACT_ADDRESS,
+        ERC20_ABI,
+        provider
+      );
+      return await contract.allowance(address, STAKING_CONTRACT_ADDRESS);
+    },
+    enabled: !!address && !!provider,
+    refetchInterval: 10000,
+  });
+};
+
+export const useApprove = () => {
+  const { signer } = useWallet();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (amount) => {
+      if (!signer) throw new Error("Wallet not connected");
+      const contract = new Contract(
+        TOKEN_CONTRACT_ADDRESS,
+        ERC20_ABI,
+        signer
+      );
+      const tx = await contract.approve(STAKING_CONTRACT_ADDRESS, amount);
+      return tx;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["allowance"] });
     },
   });
 };

@@ -1,12 +1,13 @@
 import { motion } from "framer-motion";
 import { Navbar } from "./Navbar";
+import { Footer } from "./Footer";
 import { Toaster } from "react-hot-toast";
 
 export const Layout = ({ children }) => {
   return (
-    <div className="min-h-screen bg-background text-text-primary selection:bg-accent/40 selection:text-white">
+    <div className="min-h-screen flex flex-col bg-background text-text-primary selection:bg-accent/40 selection:text-white">
       <Navbar />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20">
+      <main className="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -15,6 +16,7 @@ export const Layout = ({ children }) => {
           {children}
         </motion.div>
       </main>
+      <Footer />
       <Toaster
         position="bottom-right"
         toastOptions={{

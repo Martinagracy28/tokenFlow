@@ -14,8 +14,10 @@ import { StakeForm } from "@/components/staking/StakeForm";
 import { useWallet } from "@/hooks/useWallet";
 import { useStakeInfo, usePendingRewards } from "@/hooks/useStaking";
 import { useVestingInfo } from "@/hooks/useVesting";
+import { useTransactionHistory } from "@/hooks/useActivity";
 import { formatTokenAmount } from "@/lib/ethers";
 import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 
 export const Dashboard = () => {
@@ -24,6 +26,7 @@ export const Dashboard = () => {
   const { data: pendingRewards, isLoading: loadingRewards } =
     usePendingRewards();
   const { data: vestingInfo, isLoading: loadingVesting } = useVestingInfo();
+  const { data: history, isLoading: loadingHistory } = useTransactionHistory();
   const [timeLeft, setTimeLeft] = useState("00:00:00");
 
   useEffect(() => {
@@ -46,30 +49,6 @@ export const Dashboard = () => {
     }, 1000);
     return () => clearInterval(interval);
   }, [stakeInfo?.lockEnd]);
-
-  if (!isConnected) {
-    return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center space-y-8 relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-accent/20 blur-[120px] rounded-full animate-pulse-glow" />
-        <div className="space-y-4 relative">
-          <h1 className="text-5xl font-bold text-text-primary tracking-tight">
-            Connect to <span className="text-accent">TokenFlow</span>
-          </h1>
-          <p className="text-text-secondary text-lg max-w-md mx-auto">
-            Securely stake your tokens, track your vesting schedules, and
-            maximize your DeFi yields.
-          </p>
-        </div>
-        <Button
-          onClick={() => connect()}
-          size="lg"
-          className="h-14 px-10 text-lg shadow-glow relative"
-        >
-          Get Started
-        </Button>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-10">
@@ -134,83 +113,64 @@ export const Dashboard = () => {
 
           <Card className="p-0 border-none bg-surface/50 overflow-hidden">
             <div className="divide-y divide-border">
-              {[
-                {
-                  type: "Stake",
-                  amount: "+2,500 TFW",
-                  status: "Completed",
-                  time: "2h ago",
-                  icon: ArrowUpRight,
-                  color: "text-success",
-                },
-                {
-                  type: "Withdraw",
-                  amount: "-1,200 TFW",
-                  status: "Completed",
-                  time: "5h ago",
-                  icon: ArrowDownRight,
-                  color: "text-danger",
-                },
-                {
-                  type: "Claim",
-                  amount: "+145.20 TFW",
-                  status: "Completed",
-                  time: "1d ago",
-                  icon: Gift,
-                  color: "text-warning",
-                },
-                {
-                  type: "Vesting",
-                  amount: "+10,000 TFW",
-                  status: "Pending",
-                  time: "3d ago",
-                  icon: Lock,
-                  color: "text-accent",
-                },
-                {
-                  type: "Stake",
-                  amount: "+5,000 TFW",
-                  status: "Completed",
-                  time: "1w ago",
-                  icon: ArrowUpRight,
-                  color: "text-success",
-                },
-              ].map((tx, i) => (
-                <div
-                  key={i}
-                  className="flex items-center justify-between p-4 hover:bg-elevated/30 transition-colors"
-                >
-                  <div className="flex items-center gap-4">
-                    <div
-                      className={cn(
-                        "p-2 rounded-xl bg-background border border-border",
-                        tx.color,
-                      )}
-                    >
-                      <tx.icon className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-text-primary">
-                        {tx.type}
-                      </p>
-                      <p className="text-xs text-text-secondary">{tx.time}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className={cn("text-sm font-bold", tx.color)}>
-                      {tx.amount}
-                    </p>
-                    <Badge
-                      variant={
-                        tx.status === "Completed" ? "success" : "warning"
-                      }
-                      className="mt-1"
-                    >
-                      {tx.status}
-                    </Badge>
-                  </div>
+              {loadingHistory ? (
+                <div className="p-12 flex flex-col items-center justify-center text-text-muted gap-3">
+                  <Activity className="w-8 h-8 animate-pulse opacity-20" />
+                  <p className="text-sm font-medium animate-pulse">Fetching activities...</p>
                 </div>
-              ))}
+              ) : !history || history.length === 0 ? (
+                <div className="p-12 text-center text-text-muted">
+                  <Activity className="w-8 h-8 mx-auto mb-3 opacity-20" />
+                  <p className="text-sm font-medium">No recent activity found</p>
+                </div>
+              ) : (
+                history.slice(0, 6).map((tx, i) => {
+                  const Icon = tx.iconType === 'stake' ? ArrowUpRight : 
+                               tx.iconType === 'withdraw' ? ArrowDownRight : 
+                               tx.iconType === 'claim' ? Gift : Lock;
+                  
+                  return (
+                    <div
+                      key={i}
+                      className="flex items-center justify-between p-4 hover:bg-elevated/30 transition-colors cursor-pointer group"
+                      onClick={() => window.open(`https://sepolia.etherscan.io/tx/${tx.transactionHash}`, '_blank')}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div
+                          className={cn(
+                            "p-2.5 rounded-xl bg-background border border-border group-hover:border-accent/30 transition-colors",
+                            tx.color,
+                          )}
+                        >
+                          <Icon className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-text-primary group-hover:text-accent transition-colors">
+                            {tx.type}
+                          </p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-[10px] text-text-muted font-mono bg-elevated px-1.5 py-0.5 rounded-md">
+                              {tx.user}
+                            </span>
+                            <span className="text-[10px] text-text-muted font-mono">{tx.time}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className={cn("text-sm font-bold", tx.color)}>
+                          {tx.amount}
+                        </p>
+                        <Badge
+                          variant="success"
+                          className="mt-1 text-[10px] py-0 px-1.5 h-4"
+                        >
+                          {tx.status}
+                        </Badge>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </Card>
         </div>
