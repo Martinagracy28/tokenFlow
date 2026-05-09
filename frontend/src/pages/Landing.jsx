@@ -293,40 +293,6 @@ export const Landing = () => {
           </div>
         </section>
 
-        {/* Footer */}
-        <footer className="pt-12 pb-24 border-t border-border/50">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-8">
-            <div className="space-y-4 text-center md:text-left">
-              <div className="flex items-center gap-3 justify-center md:justify-start">
-                <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="white" />
-                    <path d="M2 17L12 22L22 17" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M2 12L12 17L22 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </div>
-                <span className="text-xl font-bold text-text-primary tracking-tighter">
-                  Token<span className="text-accent">Flow</span>
-                </span>
-              </div>
-              <p className="text-text-secondary text-sm max-w-xs">
-                The ultimate decentralized platform for token management, staking, and vesting.
-              </p>
-            </div>
-            
-            <div className="flex flex-col items-center md:items-end gap-4">
-              <div className="flex items-center gap-6">
-                <a href="https://github.com" target="_blank" rel="noreferrer" className="text-text-secondary hover:text-accent transition-colors">
-                  <Github className="w-6 h-6" />
-                </a>
-              </div>
-              <div className="text-right">
-                <p className="text-sm font-medium text-text-primary">Developed by <span className="text-accent">TokenFlow Team</span></p>
-                <p className="text-xs text-text-muted mt-1">© 2026 TokenFlow. All rights reserved.</p>
-              </div>
-            </div>
-          </div>
-        </footer>
       </div>
     </div>
   );

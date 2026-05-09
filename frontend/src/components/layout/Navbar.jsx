@@ -15,6 +15,7 @@ import {
 import { useWallet } from "@/hooks/useWallet";
 import { cn } from "@/lib/utils";
 import { toast } from "react-hot-toast";
+import { getNetworkInfo } from "@/lib/networks";
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,7 +23,7 @@ export const Navbar = () => {
   const [copied, setCopied] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const { address, isConnected, connect, disconnect } =
+  const { address, isConnected, chainId, connect, disconnect } =
     useWallet();
   const truncatedAddress = address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "";
   const location = useLocation();
@@ -59,10 +60,6 @@ export const Navbar = () => {
     }
   };
 
-  // Generate a deterministic color from address for avatar
-  const avatarColor = address
-    ? `hsl(${parseInt(address.slice(2, 8), 16) % 360}, 70%, 60%)`
-    : "#6C63FF";
 
   return (
     <nav
@@ -164,15 +161,9 @@ export const Navbar = () => {
                       : "bg-elevated/80 border-border hover:border-accent/30 hover:bg-card",
                   )}
                 >
-                  {/* Avatar ring */}
-                  <div
-                    className="relative w-7 h-7 rounded-xl flex items-center justify-center flex-shrink-0 text-xs font-bold text-white"
-                    style={{
-                      background: `linear-gradient(135deg, ${avatarColor}, #4F46E5)`,
-                      boxShadow: `0 0 10px ${avatarColor}55`,
-                    }}
-                  >
-                    {address ? address.slice(2, 4).toUpperCase() : "??"}
+                  {/* Network Logo */}
+                  <div className="relative w-7 h-7 flex-shrink-0">
+                    {getNetworkInfo(chainId).logo("w-full h-full rounded-lg")}
                   </div>
 
                   {/* Live dot + address */}
@@ -210,14 +201,8 @@ export const Navbar = () => {
                       {/* Header */}
                       <div className="p-4 border-b border-border/50">
                         <div className="flex items-center gap-3">
-                          <div
-                            className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
-                            style={{
-                              background: `linear-gradient(135deg, ${avatarColor}, #4F46E5)`,
-                              boxShadow: `0 0 16px ${avatarColor}40`,
-                            }}
-                          >
-                            {address ? address.slice(2, 4).toUpperCase() : "??"}
+                          <div className="w-10 h-10 flex-shrink-0">
+                            {getNetworkInfo(chainId).logo("w-full h-full rounded-xl")}
                           </div>
                           <div>
                             <div className="flex items-center gap-1.5 mb-0.5">
@@ -364,11 +349,8 @@ export const Navbar = () => {
                   <div className="space-y-3">
                     {/* Connected card */}
                     <div className="flex items-center gap-3 p-3 rounded-2xl bg-card border border-border">
-                      <div
-                        className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
-                        style={{ background: `linear-gradient(135deg, ${avatarColor}, #4F46E5)` }}
-                      >
-                        {address ? address.slice(2, 4).toUpperCase() : "??"}
+                      <div className="w-9 h-9 flex-shrink-0">
+                        {getNetworkInfo(chainId).logo("w-full h-full rounded-xl")}
                       </div>
                       <div>
                         <div className="flex items-center gap-1.5">
